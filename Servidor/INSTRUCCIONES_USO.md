@@ -8,7 +8,7 @@
 ## Instalación 
 
 ```bash
-# 1. Crear entorno virtual con Python 3.11
+# 1. Crear entorno virtual con Python <3.14
 python -m venv venv_tomate
 
 # 2. Activar entorno

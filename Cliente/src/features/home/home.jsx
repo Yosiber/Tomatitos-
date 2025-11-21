@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./home.css";
 
 export default function HomePage() {
@@ -8,12 +8,22 @@ export default function HomePage() {
   const [model, setModel] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setUploadedImage(file);
       setError("");
+    }
+  };
+
+  const handleLoadNewImage = () => {
+    setResultImage(null);
+    setUploadedImage(null);
+    setError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -129,29 +139,34 @@ export default function HomePage() {
           
           <h2>📊 Clasificación de Tomates</h2>
           
-          <div className="form-group">
-            <label>Seleccionar modelo</label>
-            <select 
-              value={model} 
-              onChange={(e) => setModel(e.target.value)}
-              className="select-model"
-            >
-              <option value="">-- Elige un modelo --</option>
-              <option value="modelo1">Modelo 1</option>
-              <option value="modelo2">Modelo 2</option>
-              <option value="modelo3">Modelo 3</option>
-            </select>
-          </div>
+          {!resultImage && (
+            <>
+              <div className="form-group">
+                <label>Seleccionar modelo</label>
+                <select 
+                  value={model} 
+                  onChange={(e) => setModel(e.target.value)}
+                  className="select-model"
+                >
+                  <option value="">-- Elige un modelo --</option>
+                  <option value="modelo1">Modelo 1</option>
+                  <option value="modelo2">Modelo 2</option>
+                  <option value="modelo3">Modelo 3</option>
+                </select>
+              </div>
 
-          <div className="form-group">
-            <label>Cargar imagen</label>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileChange}
-              className="file-input"
-            />
-          </div>
+              <div className="form-group">
+                <label>Cargar imagen</label>
+                <input 
+                  ref={fileInputRef}
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileChange}
+                  className="file-input"
+                />
+              </div>
+            </>
+          )}
 
           {error && <div className="error-message">{error}</div>}
 
@@ -172,10 +187,7 @@ export default function HomePage() {
             <div className="result-section">
               <h3>✅ Resultado</h3>
               <img src={resultImage} alt="resultado" className="preview-image" />
-              <button className="btn btn-back" onClick={() => {
-                setResultImage(null);
-                setUploadedImage(null);
-              }}>
+              <button className="btn btn-back" onClick={handleLoadNewImage}>
                 📸 Cargar otra imagen
               </button>
             </div>
@@ -191,15 +203,18 @@ export default function HomePage() {
           
           <h2>🎯 Segmentación de Tomates</h2>
 
-          <div className="form-group">
-            <label>Cargar imagen</label>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileChange}
-              className="file-input"
-            />
-          </div>
+          {!resultImage && (
+            <div className="form-group">
+              <label>Cargar imagen</label>
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange}
+                className="file-input"
+              />
+            </div>
+          )}
 
           {error && <div className="error-message">{error}</div>}
 
@@ -226,10 +241,7 @@ export default function HomePage() {
                 <p><span className="legend-green"></span> Maduro</p>
                 <p><span className="legend-cyan"></span> Verde/No maduro</p>
               </div>
-              <button className="btn btn-back" onClick={() => {
-                setResultImage(null);
-                setUploadedImage(null);
-              }}>
+              <button className="btn btn-back" onClick={handleLoadNewImage}>
                 📸 Cargar otra imagen
               </button>
             </div>
