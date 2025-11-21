@@ -120,7 +120,6 @@ def segmentar_tomates(image_path, model_path=None):
     overlay = img.copy()
     result = results[0]
 
-    # Colores para clases YOLO
     COLORS = {
         "damaged": (0, 0, 255),
         "old": (0, 165, 255),

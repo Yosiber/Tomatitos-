@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import "./home.css";
 
-// ...existing code...
 export default function HomePage() {
   const [mode, setMode] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -94,7 +93,6 @@ export default function HomePage() {
 
     try {
       const formData = new FormData();
-      // backend espera campo 'file' y 'modelo'
       formData.append("file", uploadedImage);
       formData.append("modelo", model);
 
@@ -109,7 +107,6 @@ export default function HomePage() {
       }
 
       const data = await response.json();
-      // backend devuelve: modelo_usado, clase_predicha, probabilidad
       setClassificationResult({
         modelo: data.modelo_usado,
         clase: data.clase_predicha,
