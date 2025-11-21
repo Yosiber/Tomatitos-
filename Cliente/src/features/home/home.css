@@ -51,10 +51,7 @@
 
 .mode-selection h1 {
   font-size: 56px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #667eea;
   margin-bottom: 16px;
   letter-spacing: -1px;
   font-weight: 800;
@@ -91,10 +88,7 @@
 }
 
 .content-section h2 {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #667eea;
   margin-bottom: 28px;
   font-size: 32px;
   display: flex;
@@ -293,10 +287,7 @@
 
 /* result specifics */
 .result-section h3 {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #10b981;
   margin-bottom: 16px;
   font-size: 24px;
   font-weight: 700;
