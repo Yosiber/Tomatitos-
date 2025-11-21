@@ -1,29 +1,63 @@
 import React, { useState, useRef } from "react";
 import "./home.css";
+import CameraCapture from "../camera/camera";
 
 export default function HomePage() {
   const [mode, setMode] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [resultImage, setResultImage] = useState(null);
   const [classificationResult, setClassificationResult] = useState(null);
   const [model, setModel] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setUploadedImage(file);
+      setPreviewUrl(null);
       setError("");
       setResultImage(null);
       setClassificationResult(null);
     }
   };
 
+  const dataURLtoFile = (dataUrl, filename) => {
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+  };
+  
+  const handlePictureTaken = async (dataUrl) => {
+    try {
+      const file = await dataURLtoFile(dataUrl, "camera.jpg");
+      setUploadedImage(file);
+      setPreviewUrl(dataUrl);
+      setShowCamera(false);
+      setError("");
+      setResultImage(null);
+      setClassificationResult(null);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudo procesar la foto de la cámara");
+    }
+  };
+
   const handleLoadNewImage = () => {
     setResultImage(null);
     setUploadedImage(null);
+    setPreviewUrl(null);
     setError("");
     setClassificationResult(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -31,17 +65,14 @@ export default function HomePage() {
 
   const handleBack = () => {
     setMode(null);
-    setUploadedImage(null);
-    setResultImage(null);
-    setClassificationResult(null);
+    handleLoadNewImage();
     setModel("");
-    setError("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setShowCamera(false);
   };
 
   const handleSegmentar = async () => {
     if (!uploadedImage) {
-      setError("Por favor carga una imagen");
+      setError("Por favor carga una imagen o toma una foto");
       return;
     }
 
@@ -77,7 +108,7 @@ export default function HomePage() {
 
   const handleClasificar = async () => {
     if (!uploadedImage) {
-      setError("Por favor carga una imagen");
+      setError("Por favor carga una imagen o toma una foto");
       return;
     }
 
@@ -120,6 +151,8 @@ export default function HomePage() {
     }
   };
 
+  const currentPreviewSrc = previewUrl ? previewUrl : (uploadedImage ? URL.createObjectURL(uploadedImage) : null);
+
   return (
     <div className="home-container">
       {!mode && (
@@ -127,16 +160,10 @@ export default function HomePage() {
           <h1>🍅 Análisis de Tomates</h1>
           <p>Selecciona una opción para comenzar</p>
           <div className="button-group">
-            <button
-              className="btn btn-primary"
-              onClick={() => setMode("classification")}
-            >
+            <button className="btn btn-primary" onClick={() => setMode("classification")}>
               📊 Clasificación
             </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => setMode("segmentation")}
-            >
+            <button className="btn btn-secondary" onClick={() => setMode("segmentation")}>
               🎯 Segmentación
             </button>
           </div>
@@ -145,21 +172,14 @@ export default function HomePage() {
 
       {mode === "classification" && (
         <div className="content-section">
-          <button className="btn btn-back" onClick={handleBack}>
-            ← Atrás
-          </button>
-
+          <button className="btn btn-back" onClick={handleBack}>← Atrás</button>
           <h2>📊 Clasificación de Tomates</h2>
 
           {!classificationResult && (
             <>
               <div className="form-group">
                 <label>Seleccionar modelo</label>
-                <select
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="select-model"
-                >
+                <select value={model} onChange={(e) => setModel(e.target.value)} className="select-model">
                   <option value="">-- Elige un modelo --</option>
                   <option value="modelo1">Modelo 1 (MobileNetV2)</option>
                   <option value="modelo2">Modelo 2 (EfficientNet)</option>
@@ -167,33 +187,30 @@ export default function HomePage() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>Cargar imagen</label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="file-input"
-                />
+              <div className="form-group" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <label>Cargar imagen</label>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
+                </div>
+                <div>
+                  <button className="btn btn-secondary" onClick={() => setShowCamera(true)}>📷 Cámara</button>
+                </div>
               </div>
             </>
           )}
 
+          {showCamera && !resultImage && (
+            <div style={{ marginTop: 12 }}>
+              <CameraCapture onPictureTaken={handlePictureTaken} onCancel={() => setShowCamera(false)} />
+            </div>
+          )}
+
           {error && <div className="error-message">{error}</div>}
 
-          {uploadedImage && !classificationResult && (
+          {currentPreviewSrc && !classificationResult && (
             <div className="preview-section">
-              <img
-                src={URL.createObjectURL(uploadedImage)}
-                alt="preview"
-                className="preview-image"
-              />
-              <button
-                className="btn btn-action"
-                onClick={handleClasificar}
-                disabled={loading}
-              >
+              <img src={currentPreviewSrc} alt="preview" className="preview-image" />
+              <button className="btn btn-action" onClick={handleClasificar} disabled={loading}>
                 {loading ? "⏳ Procesando..." : "Clasificar"}
               </button>
             </div>
@@ -202,18 +219,10 @@ export default function HomePage() {
           {classificationResult && (
             <div className="result-section">
               <h3>✅ Resultado de Clasificación</h3>
-              <p>
-                <strong>Modelo:</strong> {classificationResult.modelo}
-              </p>
-              <p>
-                <strong>Clase:</strong> {classificationResult.clase}
-              </p>
-              <p>
-                <strong>Probabilidad:</strong> {classificationResult.probabilidad}%
-              </p>
-              <button className="btn btn-back" onClick={handleLoadNewImage}>
-                📸 Cargar otra imagen
-              </button>
+              <p><strong>Modelo:</strong> {classificationResult.modelo}</p>
+              <p><strong>Clase:</strong> {classificationResult.clase}</p>
+              <p><strong>Probabilidad:</strong> {classificationResult.probabilidad}%</p>
+              <button className="btn btn-back" onClick={handleLoadNewImage}>📸 Cargar otra imagen</button>
             </div>
           )}
         </div>
@@ -221,39 +230,33 @@ export default function HomePage() {
 
       {mode === "segmentation" && (
         <div className="content-section">
-          <button className="btn btn-back" onClick={handleBack}>
-            ← Atrás
-          </button>
-
+          <button className="btn btn-back" onClick={handleBack}>← Atrás</button>
           <h2>🎯 Segmentación de Tomates</h2>
 
           {!resultImage && (
-            <div className="form-group">
-              <label>Cargar imagen</label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="file-input"
-              />
+            <div className="form-group" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <div style={{ flex: 1 }}>
+                <label>Cargar imagen</label>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
+              </div>
+              <div>
+                <button className="btn btn-secondary" onClick={() => setShowCamera(true)}>📷 Cámara</button>
+              </div>
+            </div>
+          )}
+
+          {showCamera && !resultImage && (
+            <div style={{ marginTop: 12 }}>
+              <CameraCapture onPictureTaken={handlePictureTaken} onCancel={() => setShowCamera(false)} />
             </div>
           )}
 
           {error && <div className="error-message">{error}</div>}
 
-          {uploadedImage && !resultImage && (
+          {currentPreviewSrc && !resultImage && (
             <div className="preview-section">
-              <img
-                src={URL.createObjectURL(uploadedImage)}
-                alt="preview"
-                className="preview-image"
-              />
-              <button
-                className="btn btn-action"
-                onClick={handleSegmentar}
-                disabled={loading}
-              >
+              <img src={currentPreviewSrc} alt="preview" className="preview-image" />
+              <button className="btn btn-action" onClick={handleSegmentar} disabled={loading}>
                 {loading ? "⏳ Segmentando..." : "🔍 Segmentar"}
               </button>
             </div>
@@ -264,22 +267,12 @@ export default function HomePage() {
               <h3>✅ Resultado de Segmentación</h3>
               <img src={resultImage} alt="resultado" className="preview-image" />
               <div className="legend">
-                <p>
-                  <span className="legend-red" /> Dañado
-                </p>
-                <p>
-                  <span className="legend-orange" /> Viejo/Sobre-maduro
-                </p>
-                <p>
-                  <span className="legend-green" /> Maduro
-                </p>
-                <p>
-                  <span className="legend-cyan" /> Verde/No maduro
-                </p>
+                <p><span className="legend-red" /> Dañado</p>
+                <p><span className="legend-orange" /> Viejo/Sobre-maduro</p>
+                <p><span className="legend-green" /> Maduro</p>
+                <p><span className="legend-cyan" /> Verde/No maduro</p>
               </div>
-              <button className="btn btn-back" onClick={handleLoadNewImage}>
-                📸 Cargar otra imagen
-              </button>
+              <button className="btn btn-back" onClick={handleLoadNewImage}>📸 Cargar otra imagen</button>
             </div>
           )}
         </div>

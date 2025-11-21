@@ -1,0 +1,74 @@
+.camera-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: 18px;
+  background: #1e1e1e;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.camera-video {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 16px;
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+button.button {
+  padding: 0.7rem 1.4rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Botón primario */
+.button.is-primary {
+  background: #4a8cff;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 10px rgba(74, 140, 255, 0.4);
+}
+
+.button.is-primary:hover {
+  background: #3c78e0;
+  transform: translateY(-2px);
+}
+
+/* Botón secundario */
+.button:not(.is-primary) {
+  background: #333;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+.button:not(.is-primary):hover {
+  background: #444;
+  transform: translateY(-2px);
+}
+
+/* Movil */
+@media (max-width: 480px) {
+  .camera-container {
+    padding: 1rem;
+  }
+  .buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  button.button {
+    width: 100%;
+  }
+}
