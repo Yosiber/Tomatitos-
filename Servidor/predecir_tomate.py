@@ -17,9 +17,9 @@ CORS(app)
 # ============================================
 
 MODEL_PATHS = {
-    "modelo1": "models/MobileNetV2.keras",
-    "modelo2": "models/EfficientNetB0.keras",
-    "modelo3": "models/ResNet50.keras"
+    "MobileNetV2": "models/MobileNetV2.keras",
+    "EfficientNetB0": "models/EfficientNetB0.keras",
+    "ResNet50": "models/ResNet50.keras"
 }
 
 CLASS_NAMES = ["Damaged", "Old", "Ripe", "Unripe"]

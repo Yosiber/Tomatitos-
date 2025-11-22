@@ -28,7 +28,8 @@ const CameraCapture = ({ onPictureTaken, onCancel }) => {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, 
+);
 
   const handleTakePicture = () => {
     if (videoRef.current && canvasRef.current) {

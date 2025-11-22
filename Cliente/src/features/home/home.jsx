@@ -181,19 +181,17 @@ export default function HomePage() {
                 <label>Seleccionar modelo</label>
                 <select value={model} onChange={(e) => setModel(e.target.value)} className="select-model">
                   <option value="">-- Elige un modelo --</option>
-                  <option value="modelo1">Modelo 1 (MobileNetV2)</option>
-                  <option value="modelo2">Modelo 2 (EfficientNet)</option>
-                  <option value="modelo3">Modelo 3 (ResNet50)</option>
+                  <option value="MobileNetV2">Modelo 1 (MobileNetV2)</option>
+                  <option value="EfficientNet">Modelo 2 (EfficientNet)</option>
+                  <option value="ResNet50">Modelo 3 (ResNet50)</option>
                 </select>
               </div>
 
-              <div className="form-group" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <div style={{ flex: 1 }}>
-                  <label>Cargar imagen</label>
+              <div className="form-group">
+                <label>Cargar imagen o tomar foto</label>
+                <div className="upload-options">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
-                </div>
-                <div>
-                  <button className="btn btn-secondary" onClick={() => setShowCamera(true)}>📷 Cámara</button>
+                  <button className="btn btn-camera" onClick={() => setShowCamera(true)}>📷 Cámara</button>
                 </div>
               </div>
             </>
@@ -234,13 +232,11 @@ export default function HomePage() {
           <h2>🎯 Segmentación de Tomates</h2>
 
           {!resultImage && (
-            <div className="form-group" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ flex: 1 }}>
-                <label>Cargar imagen</label>
+            <div className="form-group">
+              <label>Cargar imagen o tomar foto</label>
+              <div className="upload-options">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
-              </div>
-              <div>
-                <button className="btn btn-secondary" onClick={() => setShowCamera(true)}>📷 Cámara</button>
+                <button className="btn btn-camera" onClick={() => setShowCamera(true)}>📷 Cámara</button>
               </div>
             </div>
           )}

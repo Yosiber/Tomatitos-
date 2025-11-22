@@ -250,6 +250,27 @@
   letter-spacing: 0.3px;
 }
 
+.upload-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.btn-camera {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 14px 24px;
+  font-size: 15px;
+  box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+  white-space: nowrap;
+}
+
+.btn-camera:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(245, 87, 108, 0.5);
+}
+
 .preview-section,
 .result-section {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
