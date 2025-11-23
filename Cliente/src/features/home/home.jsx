@@ -77,7 +77,6 @@ export default function HomePage() {
       return;
     }
 
-    // Apagar cámara antes de procesar (desmonta CameraCapture y libera la cámara)
     setShowCamera(false);
 
     setLoading(true);
@@ -156,11 +155,19 @@ export default function HomePage() {
       }
 
       const data = await response.json();
+
+      if (data.message === "No se detectaron tomates") {
+        setError("❌ No se detectaron tomates");
+        setClassificationResult(null);
+        return;
+      }
+
       setClassificationResult({
         modelo: data.modelo_usado,
         clase: data.clase_predicha,
         probabilidad: data.probabilidad,
       });
+
     } catch (err) {
       setError(`❌ Error: ${err.message}`);
       console.error(err);
@@ -200,7 +207,7 @@ export default function HomePage() {
                 <select value={model} onChange={(e) => setModel(e.target.value)} className="select-model">
                   <option value="">-- Elige un modelo --</option>
                   <option value="MobileNetV2">Modelo 1 (MobileNetV2)</option>
-                  <option value="EfficientNet">Modelo 2 (EfficientNet)</option>
+                  <option value="EfficientNetB0">Modelo 2 (EfficientNet)</option>
                   <option value="ResNet50">Modelo 3 (ResNet50)</option>
                 </select>
               </div>

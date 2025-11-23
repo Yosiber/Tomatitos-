@@ -39,7 +39,6 @@ def get_segmented_image_bytes(file_id_str):
     return file_obj.read()
 
 
-# Endpoint público para recuperar la imagen por id
 @app.route("/imagen/<file_id>", methods=["GET"])
 def obtener_imagen(file_id):
     try:
@@ -84,6 +83,10 @@ def load_model(model_key):
 def preprocess_image(image_bytes):
     """Prepara una imagen para TF."""
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+
+    if img is None:
+            return jsonify({"message": "No se detectaron tomates"}), 200
+    
     img = img.resize((224, 224))
     img_array = np.array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
@@ -94,36 +97,41 @@ def preprocess_image(image_bytes):
 def predict():
     if "file" not in request.files:
         return jsonify({"error": "No se encontró archivo 'file'"}), 400
-    
+
     if "modelo" not in request.form:
         return jsonify({"error": "Debes enviar el modelo"}), 400
 
     file = request.files["file"]
     model_key = request.form["modelo"]
 
-    if file.filename == "":
-        return jsonify({"error": "Nombre de archivo vacío"}), 400
-
     try:
         image_bytes = file.read()
         img_array = preprocess_image(image_bytes)
 
         model = load_model(model_key)
-
         preds = model.predict(img_array)
+
         class_index = np.argmax(preds[0])
         confidence = float(np.max(preds[0]))
+        class_name = CLASS_NAMES[class_index]
 
-        response = {
+        if confidence < 0.60:
+            return jsonify({
+                "message": "No se detectaron tomates",
+                "probabilidad": round(confidence * 100, 2),
+                "modelo_usado": model_key
+            }), 200
+
+        return jsonify({
             "modelo_usado": model_key,
-            "clase_predicha": CLASS_NAMES[class_index],
+            "clase_predicha": class_name,
             "probabilidad": round(confidence * 100, 2)
-        }
+        })
 
-        return jsonify(response)
-    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 
 # ============================================

@@ -4,7 +4,7 @@ import "./camera.css";
 const CameraCapture = ({ onPictureTaken, onCancel }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const streamRef = useRef(null); // usar ref para mantener la referencia al stream
+  const streamRef = useRef(null); 
 
   useEffect(() => {
     let mounted = true;
@@ -13,7 +13,6 @@ const CameraCapture = ({ onPictureTaken, onCancel }) => {
       try {
         const s = await navigator.mediaDevices.getUserMedia({ video: true });
         if (!mounted) {
-          // en caso de que se haya desmontado antes de asignar
           s.getTracks().forEach((t) => t.stop());
           return;
         }
@@ -23,7 +22,6 @@ const CameraCapture = ({ onPictureTaken, onCancel }) => {
         }
       } catch (err) {
         console.error("Error al acceder a la cámara:", err);
-        // Notificar al padre que cancele la cámara
         if (onCancel) onCancel();
       }
     };
@@ -32,7 +30,6 @@ const CameraCapture = ({ onPictureTaken, onCancel }) => {
 
     return () => {
       mounted = false;
-      // cleanup: detener todos los tracks si existen
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -72,7 +69,6 @@ const CameraCapture = ({ onPictureTaken, onCancel }) => {
 
       const imageData = canvas.toDataURL("image/jpeg");
 
-      // detener la cámara inmediatamente antes de salir
       stopStream();
 
       if (onPictureTaken) onPictureTaken(imageData);

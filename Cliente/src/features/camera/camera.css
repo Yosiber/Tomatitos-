@@ -34,7 +34,6 @@ button.button {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Botón primario */
 .button.is-primary {
   background: #4a8cff;
   color: white;
@@ -47,7 +46,6 @@ button.button {
   transform: translateY(-2px);
 }
 
-/* Botón secundario */
 .button:not(.is-primary) {
   background: #333;
   color: #ddd;
