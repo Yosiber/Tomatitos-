@@ -60,6 +60,7 @@ export default function HomePage() {
     setPreviewUrl(null);
     setError("");
     setClassificationResult(null);
+    setShowCamera(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -70,11 +71,14 @@ export default function HomePage() {
     setShowCamera(false);
   };
 
-  const handleSegmentar = async () => {
+  async function handleSegmentar() {
     if (!uploadedImage) {
       setError("Por favor carga una imagen o toma una foto");
       return;
     }
+
+    // Apagar cámara antes de procesar (desmonta CameraCapture y libera la cámara)
+    setShowCamera(false);
 
     setLoading(true);
     setError("");
@@ -90,21 +94,32 @@ export default function HomePage() {
         body: formData,
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Error en la segmentación");
+        throw new Error(data.error || "Error en la segmentación");
       }
 
-      const blob = await response.blob();
-      const resultUrl = URL.createObjectURL(blob);
-      setResultImage(resultUrl);
+      if (data.mongo_id) {
+        const imgRes = await fetch(`http://localhost:5000/imagen/${data.mongo_id}`);
+        if (!imgRes.ok) {
+          throw new Error("No se pudo recuperar la imagen desde el servidor");
+        }
+        const blob = await imgRes.blob();
+        const resultUrl = URL.createObjectURL(blob);
+        setResultImage(resultUrl);
+      } else if (data.message) {
+        setError(data.message);
+      } else {
+        throw new Error("Respuesta inesperada del servidor");
+      }
     } catch (err) {
       setError(`❌ Error: ${err.message}`);
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleClasificar = async () => {
     if (!uploadedImage) {
@@ -116,6 +131,9 @@ export default function HomePage() {
       setError("Por favor selecciona un modelo");
       return;
     }
+
+    // Apagar cámara antes de procesar
+    setShowCamera(false);
 
     setLoading(true);
     setError("");

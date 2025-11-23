@@ -8,9 +8,46 @@ from PIL import Image
 import tensorflow as tf
 import cv2
 from ultralytics import YOLO
+from bson import ObjectId
+from pymongo import MongoClient
+import gridfs
 
 app = Flask(__name__)
 CORS(app)
+
+# Inicializar conexión a MongoDB + GridFS
+# Usar el comando db.fs.files.find().pretty() en MongoDB para ver los archivos guardados
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+mongo_client = MongoClient(MONGO_URI)
+mongo_db = mongo_client.get_database("tomates_db")
+fs = gridfs.GridFS(mongo_db)
+
+# ============================================
+#   GUARDAR EN MONGODB GRIDFS
+# ============================================
+
+def save_segmented_image(image_path, metadata=None):
+    """Guarda una imagen segmentada en GridFS y devuelve el id (string)."""
+    with open(image_path, "rb") as f:
+        file_id = fs.put(f, metadata=metadata)
+    return str(file_id)
+
+
+def get_segmented_image_bytes(file_id_str):
+    """Obtiene bytes de una imagen almacenada en GridFS."""
+    file_obj = fs.get(ObjectId(file_id_str))
+    return file_obj.read()
+
+
+# Endpoint público para recuperar la imagen por id
+@app.route("/imagen/<file_id>", methods=["GET"])
+def obtener_imagen(file_id):
+    try:
+        data = get_segmented_image_bytes(file_id)
+        return send_file(io.BytesIO(data), mimetype="image/jpeg", download_name="segmentado.jpg")
+    except Exception as e:
+        return jsonify({"error": str(e)}), 404
+
 
 # ============================================
 #   MODELOS DE CLASIFICACIÓN
@@ -170,20 +207,31 @@ def segmentar_tomates(image_path, model_path=None):
 @app.route("/segmentar", methods=["POST"])
 def api_segmentar():
     if "imagen" not in request.files:
-        return jsonify({"error": "No se envió una imagen"}), 400
+        return jsonify({"error": "No enviaste ninguna imagen"}), 400
 
-    image = request.files["imagen"]
+    img_file = request.files["imagen"]
 
     tmp_input = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-    image.save(tmp_input.name)
+    img_file.save(tmp_input.name)
 
     try:
-        result = segmentar_tomates(tmp_input.name)
+        resultado = segmentar_tomates(tmp_input.name)
 
-        if result is None:
+        if resultado is None:
             return jsonify({"message": "No se detectaron tomates"}), 200
-        
-        return send_file(result, mimetype="image/jpeg")
+
+        mongo_id = save_segmented_image(
+            resultado,
+            metadata={
+                "descripcion": "Imagen segmentada de tomates",
+                "modelo": "yolo",
+            }
+        )
+
+        return jsonify({
+            "message": "Imagen segmentada guardada",
+            "mongo_id": mongo_id
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
