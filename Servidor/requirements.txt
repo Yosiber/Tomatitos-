@@ -6,3 +6,6 @@ torch>=2.0.0
 flask
 flask_cors
 tensorflow
+pymongo 
+gridfs
+bson
