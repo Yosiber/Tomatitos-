@@ -213,9 +213,9 @@ export default function HomePage() {
               </div>
 
               <div className="form-group">
-                <label>Cargar imagen o tomar foto</label>
+                <label>Cargar imagen o tomar foto (Sólo una unidad por imagen)</label>
                 <div className="upload-options">
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input " />
                   <button className="btn btn-camera" onClick={() => setShowCamera(true)}>📷 Cámara</button>
                 </div>
               </div>

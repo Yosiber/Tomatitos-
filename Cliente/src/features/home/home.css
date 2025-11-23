@@ -179,6 +179,7 @@
   padding: 10px 16px;
   font-size: 14px;
   margin-bottom: 16px;
+  margin-top: 15px;
   border-radius: 10px;
   border: 1px solid rgba(100, 116, 139, 0.2);
   font-weight: 600;
@@ -220,12 +221,16 @@
   padding: 14px 16px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 16px;
   transition: all 0.3s ease;
   font-family: inherit;
   background: white;
   color: #1e293b;
   font-weight: 500;
+}
+
+.select-model {
+  margin-bottom: 15px;
 }
 
 .select-model:focus,
@@ -243,10 +248,10 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-weight: 600;
   color: #334155;
-  font-size: 14px;
+  font-size: 18px;
   letter-spacing: 0.3px;
 }
 
@@ -261,7 +266,7 @@
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   padding: 14px 24px;
-  font-size: 15px;
+  font-size: 16px;
   box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
   white-space: nowrap;
 }
