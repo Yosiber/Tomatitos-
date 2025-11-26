@@ -1,20 +1,21 @@
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import Xception, EfficientNetB2, MobileNetV2
+from tensorflow.keras.applications import ResNet50, EfficientNetB0, MobileNetV2
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from tensorflow.keras.optimizers import Adam
 import os
-import shutil
 
 TRAIN_DIR = "dataset/train"
 VAL_DIR = "dataset/val"
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 16
-EPOCHS = 20  
+EPOCHS = 20
 MODEL_SAVE_DIR = "models"
-BEST_MODEL_PATH = os.path.join(MODEL_SAVE_DIR, "best_model.keras")
 
+# ===============================
+# DATA AUGMENTATION
+# ===============================
 datagen_train = ImageDataGenerator(
     rescale=1.0/255,
     rotation_range=15,
@@ -41,13 +42,16 @@ val_gen = datagen_val.flow_from_directory(
 
 NUM_CLASSES = len(train_gen.class_indices)
 
+# ===============================
+# MODEL CREATION
+# ===============================
 def create_model(base_model_class, input_shape=(224, 224, 3), num_classes=4):
     base_model = base_model_class(
         include_top=False,
         weights='imagenet',
         input_shape=input_shape
     )
-    base_model.trainable = False  # Congelar pesos base
+    base_model.trainable = False
 
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
@@ -55,15 +59,20 @@ def create_model(base_model_class, input_shape=(224, 224, 3), num_classes=4):
     predictions = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs=base_model.input, outputs=predictions)
-    model.compile(optimizer=Adam(learning_rate=0.0001),
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    model.compile(
+        optimizer=Adam(learning_rate=0.0001),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+    )
     return model
 
+# ===============================
+# TRAIN ALL MODELS
+# ===============================
 def train_all_models():
     models_to_train = {
-        "Xception": Xception,
-        "EfficientNetB2": EfficientNetB2,
+        "ResNet50": ResNet50,
+        "EfficientNetB0": EfficientNetB0,
         "MobileNetV2": MobileNetV2
     }
 
@@ -96,30 +105,15 @@ def train_all_models():
 
     return results
 
-
-def select_best_model(results):
-    # Ordenar por mayor accuracy y menor loss
-    sorted_models = sorted(results, key=lambda x: (-x['val_accuracy'], x['val_loss']))
-    best_model = sorted_models[0]
-
-    # Copiar el mejor modelo a "best_model.keras"
-    shutil.copy(best_model['path'], BEST_MODEL_PATH)
-
-    return best_model
-
 # ===============================
 # MAIN
 # ===============================
 if __name__ == "__main__":
     print("🚀 Iniciando entrenamiento de modelos...")
+    
     results = train_all_models()
-    best_model = select_best_model(results)
 
     print("\n🏁 Entrenamiento completado!")
-    print("📊 Resultados:")
+    print("📊 Resultados finales:")
     for r in results:
         print(f" - {r['model_name']}: val_accuracy={r['val_accuracy']}%, val_loss={r['val_loss']}")
-
-    print(f"\n🥇 Mejor modelo: {best_model['model_name']}")
-    print(f"   Accuracy: {best_model['val_accuracy']}%")
-    print(f"   Guardado como: {BEST_MODEL_PATH}")
