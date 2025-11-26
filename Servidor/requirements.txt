@@ -7,5 +7,3 @@ flask
 flask_cors
 tensorflow
 pymongo 
-gridfs
-bson

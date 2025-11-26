@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  tomate_frontend:
+    build:
+      context: ./Cliente
+      dockerfile: Dockerfile
+    container_name: tomate_frontend
+    restart: unless-stopped
+    ports:
+      - "5010:5010"
+
+  tomate_backend:
+    build:
+      context: ./Servidor
+      dockerfile: Dockerfile
+    container_name: tomate_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
